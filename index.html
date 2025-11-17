@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SPA: Licenciatura en Tecnología Educativa</title>
+    
+    <!-- 
+    Chosen Palette: "Modern & Bold" (Basado en el contexto previo del usuario)
+    Primary: '#009688' (Teal)
+    Secondary: '#607D8B' (Slate)
+    Accent: '#FF5722' (Orange)
+    Background: '#ECEFF1' (Light Gray)
+    Card/Text: '#FFFFFF', '#333333'
+    -->
+    
+    <!-- 
+    Application Structure Plan:
+    He diseñado una SPA con 3 pestañas temáticas principales, en lugar de un scroll largo, para mejorar la exploración del usuario.
+    1. CONTEXTO: Responde al "¿Por qué ahora?" (Sociedad del Conocimiento).
+    2. EL AGENTE: Responde al "¿Quién es y qué hace?" (Perfil, Competencias con un sub-menú interactivo para Perfil, Acciones y Proceso).
+    3. IMPACTO: Responde al "¿Por qué esta carrera?" (Demanda y Proyección Económica).
+    Esta estructura de "dashboard" es más interactiva y permite al usuario navegar directamente a la información que necesita. La navegación es 100% funcional con Vanilla JS.
+    -->
+
+    <!-- 
+    Visualization & Content Choices:
+    - [Slide 2] Sociedad del Conocimiento -> HTML/CSS Cards (Goal: Organize). Son conceptos cualitativos, las tarjetas son ideales. (NO SVG/Mermaid).
+    - [Slide 4] Perfil del Tecnólogo -> HTML/CSS Cards (Goal: Organize). (NO SVG/Mermaid).
+    - [Slides 5-7] Acciones Clave -> Radar Chart (Chart.js/Canvas) (Goal: Compare). Compara visualmente las 6 áreas de competencia clave. (NO SVG/Mermaid).
+    - [Slide 8] Proceso (ADDIE) -> HTML/CSS Flowchart (Goal: Organize). Un diagrama de flujo con DIVs y flechas Unicode, 100% accesible y sin SVG/Mermaid.
+    - [Slide 3] Demanda -> HTML Table (Goal: Compare). Los datos son cualitativos; una tabla es más clara que un gráfico. (NO SVG/Mermaid).
+    - [Slide 9] Impacto Económico -> Bar Chart (Salarios) y Donut Chart (Flexibilidad) (Chart.js/Canvas) (Goal: Inform/Compare). Visualizaciones clásicas para datos cuantitativos. (NO SVG/Mermaid).
+    - Se aplica la lógica de ajuste de etiquetas (>16 caracteres) y el callback de tooltip obligatorio a TODOS los gráficos.
+    -->
+    
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            colors: {
+              'primary': '#009688',
+              'secondary': '#607D8B',
+              'accent': '#FF5722',
+              'light-bg': '#ECEFF1',
+              'dark-text': '#333333',
+              'card-bg': '#FFFFFF',
+            },
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+    <style>
+      .chart-container {
+        position: relative;
+        width: 100%;
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 300px;
+        max-height: 400px;
+      }
+      @media (min-width: 768px) {
+        .chart-container {
+          height: 350px;
+        }
+      }
+      .chart-container-sm {
+        position: relative;
+        width: 100%;
+        max-width: 300px;
+        margin-left: auto;
+        margin-right: auto;
+        height: 250px;
+        max-height: 250px;
+      }
+      .nav-tab-button {
+        @apply px-6 py-3 text-sm font-extrabold cursor-pointer transition-all duration-300 rounded-full border-2 border-secondary/0;
+      }
+      .nav-tab-button:not(.active) {
+        /* CAMBIO DE COLOR: Fondo Naranja (Accent), Hover ligeramente más oscuro */
+        @apply text-white bg-accent hover:bg-accent/80 hover:shadow-lg transform hover:scale-105;
+      }
+      .nav-tab-button.active {
+        /* CAMBIO DE COLOR: Fondo Teal (Primary) con borde Naranja (Accent) para destacar */
+        @apply bg-primary text-white shadow-xl border-accent;
+      }
+      .content-section {
+        display: none;
+      }
+      .content-section.active {
+        display: block;
+      }
+      .sub-nav-link {
+        @apply px-4 py-2 text-sm font-semibold text-secondary hover:bg-gray-200 cursor-pointer transition-colors duration-200 rounded-t-lg;
+      }
+      .sub-nav-link.active {
+        @apply bg-primary text-white;
+      }
+      .sub-content-section {
+        display: none;
+      }
+      .sub-content-section.active {
+        display: block;
+      }
+      .flow-step {
+        @apply bg-secondary text-white p-4 rounded-lg shadow-md text-center font-bold text-sm md:text-base;
+      }
+      .flow-arrow {
+        @apply text-accent text-3xl md:text-4xl font-black transform md:rotate-90 md:rotate-0;
+      }
+      .quote-icon {
+        color: #009688;
+        font-size: 3rem;
+        line-height: 1;
+      }
+    </style>
+</head>
+<body class="bg-light-bg text-dark-text font-sans">
+
+    <header class="bg-primary text-white p-6 shadow-lg">
+        <h1 class="text-3xl md:text-4xl font-black text-center">Licenciatura en Tecnología Educativa</h1>
+        <p class="text-center text-lg font-light mt-1">El SPA Interactivo sobre el Futuro del Aprendizaje</p>
+    </header>
+
+    <nav class="bg-secondary shadow-md sticky top-0 z-10">
+        <div class="container mx-auto flex flex-col md:flex-row justify-center space-y-2 md:space-y-0 md:space-x-4 py-3">
+            <button id="nav-contexto" class="nav-tab-button active" onclick="showSection('contexto')">1. Sociedad y Contexto</button>
+            <button id="nav-agente" class="nav-tab-button" onclick="showSection('agente')">2. El Agente Transformador</button>
+            <button id="nav-impacto" class="nav-tab-button" onclick="showSection('impacto')">3. Demanda e Impacto</button>
+            <button id="nav-testimonios" class="nav-tab-button" onclick="showSection('testimonios')">4. Testimonios</button>
+        </div>
+    </nav>
+
+    <main class="container mx-auto p-4 md:p-8">
+
+        <!-- SECCIÓN 1: SOCIEDAD Y CONTEXTO -->
+        <section id="contexto" class="content-section active">
+            <h2 class="text-3xl font-bold text-primary mb-4">1. La Nueva Sociedad del Conocimiento</h2>
+            <p class="text-lg text-secondary mb-8">El paradigma ha cambiado. La sociedad ya no valora la posesión de datos, sino la capacidad de filtrar, curar y aplicar ese conocimiento. El Tecnólogo Educativo es la respuesta a este desafío.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-card-bg rounded-lg shadow-md p-6 border-t-4 border-accent">
+                    <h3 class="text-xl font-bold text-primary mb-2">Nuevo Paradigma</h3>
+                    <p>La complejidad del conocimiento exige un cambio radical: no se trata de memorizar, sino de **adaptabilidad y juicio crítico** para navegar la incertidumbre.</p>
+                </div>
+                <div class="bg-card-bg rounded-lg shadow-md p-6 border-t-4 border-accent">
+                    <h3 class="text-xl font-bold text-primary mb-2">Aprendizaje Continuo</h3>
+                    <p>La única constante es el cambio. El "Lifelong Learning" es una realidad. Diseñamos capacitaciones ininterrumpidas y efectivas.</p>
+                </div>
+                <div class="bg-card-bg rounded-lg shadow-md p-6 border-t-4 border-accent">
+                    <h3 class="text-xl font-bold text-primary mb-2">El Rol de la IA</h3>
+                    <p>La IA gestiona contenido. El Tecnólogo Educativo enseña a usar la IA para **pensar críticamente**, no solo para obtener respuestas.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 2: EL AGENTE TRANSFORMADOR -->
+        <section id="agente" class="content-section">
+            <h2 class="text-3xl font-bold text-primary mb-4">2. El Agente Transformador</h2>
+            <p class="text-lg text-secondary mb-6">El Tecnólogo Educativo es un profesional híbrido que domina la pedagogía, la tecnología y la gestión de datos. Es el nexo estratégico que lidera la innovación.</p>
+            
+            <nav class="flex border-b-2 border-primary mb-4">
+                <div id="sub-nav-perfil" class="sub-nav-link active" onclick="showSubSection('perfil')">Perfil</div>
+                <div id="sub-nav-acciones" class="sub-nav-link" onclick="showSubSection('acciones')">Acciones Clave</div>
+                <div id="sub-nav-proceso" class="sub-nav-link" onclick="showSubSection('proceso')">El Proceso (DI)</div>
+            </nav>
+
+            <div id="sub-content-perfil" class="sub-content-section active">
+                <h3 class="text-2xl font-bold text-secondary mb-4">El Perfil del Tecnólogo</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-card-bg rounded-lg shadow-md p-6">
+                        <span class="text-5xl">💡</span>
+                        <h4 class="text-xl font-bold text-primary mt-2 mb-2">Visionario Pedagógico</h4>
+                        <p>No solo sabe *qué* tecnología usar, sino *por qué* y *para qué*, centrando todo en el estudiante o empleado.</p>
+                    </div>
+                    <div class="bg-card-bg rounded-lg shadow-md p-6">
+                        <span class="text-5xl">🧩</span>
+                        <h4 class="text-xl font-bold text-primary mt-2 mb-2">Arquitecto de Experiencias</h4>
+                        <p>Diseña ecosistemas de aprendizaje efectivos, atractivos y escalables (de la escuela a la multinacional).</p>
+                    </div>
+                    <div class="bg-card-bg rounded-lg shadow-md p-6">
+                        <span class="text-5xl">📊</span>
+                        <h4 class="text-xl font-bold text-primary mt-2 mb-2">Especialista en Data</h4>
+                        <p>Utiliza Learning Analytics para tomar decisiones basadas en evidencia y mejorar los resultados en tiempo real.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sub-content-acciones" class="sub-content-section">
+                <h3 class="text-2xl font-bold text-secondary mb-4">Acciones Clave y Competencias</h3>
+                <p class="mb-6">El egresado domina un conjunto de methodologies y herramientas estratégicas. Este gráfico de radar muestra las áreas de competencia clave, desde el microlearning hasta la evaluación estratégica.</p>
+                <div class="bg-card-bg rounded-lg shadow-md p-6">
+                    <div class="chart-container">
+                        <canvas id="competenciasChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sub-content-proceso" class="sub-content-section">
+                <h3 class="text-2xl font-bold text-secondary mb-4">El Mapa Maestro: Diseño Instruccional (ADDIE)</h3>
+                <p class="mb-6">El Diseño Instruccional (DI) es el proceso sistemático para traducir los principios de aprendizaje en materiales efectivos. Este es el mapa que sigue el Tecnólogo (Modelo ADDIE):</p>
+                <div class="flex flex-col md:flex-row justify-center items-center md:space-x-4 space-y-4 md:space-y-0 p-4 bg-card-bg rounded-lg shadow-md">
+                    <div class="flow-step">1. Análisis</div>
+                    <div class="flow-arrow">➡️</div>
+                    <div class="flow-step">2. Diseño</div>
+                    <div class="flow-arrow">➡️</div>
+                    <div class="flow-step">3. Desarrollo</div>
+                    <div class="flow-arrow">➡️</div>
+                    <div class="flow-step">4. Implementación</div>
+                    <div class="flow-arrow">➡️</div>
+                    <div class="flow-step">5. Evaluación</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 3: DEMANDA E IMPACTO -->
+        <section id="impacto" class="content-section">
+            <h2 class="text-3xl font-bold text-primary mb-4">3. Demanda Actual e Impacto Profesional</h2>
+            <p class="text-lg text-secondary mb-8">Esta carrera responde a una demanda concreta y creciente. La inversión en formación se traduce en un claro retorno profesional y un alto impacto en los sectores clave.</p>
+
+            <!-- Subsección de Demanda -->
+            <h3 class="text-2xl font-bold text-secondary mb-6">Demanda Actual en Sectores Clave</h3>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <!-- Demanda Educativa -->
+                <div class="bg-card-bg rounded-lg shadow-md p-6 border-t-4 border-primary">
+                    <h3 class="text-2xl font-bold text-primary mb-4">Demanda Educativa (Instituciones)</h3>
+                    <p class="text-secondary mb-4">El sector educativo requiere expertos que transformen la enseñanza tradicional en modelos inclusivos y adaptados a la era digital:</p>
+                    <ul class="list-disc list-inside space-y-2 ml-4">
+                        <li>Inclusión digital y Diseño Universal para el Aprendizaje (DUA).</li>
+                        <li>Diseño de trayectorias personalizadas (de Inicial a Posgrado).</li>
+                        <li>Formación docente en metodologías activas y tecnología.</li>
+                        <li>Evaluación por competencias, no solo por memoria.</li>
+                    </ul>
+                    <p class="mt-4 font-semibold text-accent">Valor Aportado: Garantiza que la tecnología sirva a la inclusión y no a la exclusión.</p>
+                </div>
+
+                <!-- Demanda Empresarial -->
+                <div class="bg-card-bg rounded-lg shadow-md p-6 border-t-4 border-accent">
+                    <h3 class="text-2xl font-bold text-primary mb-4">Demanda Empresarial (Corporaciones)</h3>
+                    <p class="text-secondary mb-4">Las empresas buscan un retorno de inversión (ROI) claro en la capacitación. El Tecnólogo asegura la eficiencia en la formación de empleados:</p>
+                    <ul class="list-disc list-inside space-y-2 ml-4">
+                        <li>Reducción de la curva de aprendizaje y *onboarding* escalable.</li>
+                        <li>Formación *just-in-time* (Microlearning) y en habilidades blandas.</li>
+                        <li>Medición del desempeño y el impacto real de la capacitación (ROI).</li>
+                        <li>Diseño de simulaciones y Aprendizaje Basado en Retos (ABR).</li>
+                    </ul>
+                    <p class="mt-4 font-semibold text-accent">Valor Aportado: Convierte la capacitación en una inversión medible y eficiente.</p>
+                </div>
+            </div>
+
+            <!-- Subsección de Impacto Económico -->
+            <h3 class="text-2xl font-bold text-secondary mb-6 mt-12">Impacto Económico y Profesional</h3>
+            <p class="text-lg text-secondary mb-8">Los roles de *Instructional Designer* y *E-learning Manager* están entre los más buscados y mejor pagados en Argentina y LATAM.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Card Salarios -->
+                <div class="bg-card-bg rounded-lg shadow-md p-6">
+                    <h4 class="text-center font-bold text-primary mb-4">Comparativa Salarial</h4>
+                    <div class="chart-container" style="height: 250px;">
+                        <canvas id="salariosChart"></canvas>
+                    </div>
+                </div>
+                <!-- Card Flexibilidad -->
+                <div class="bg-card-bg rounded-lg shadow-md p-6">
+                    <h4 class="text-center font-bold text-primary mb-4">Flexibilidad (80% Remoto)</h4>
+                    <div class="chart-container-sm" style="height: 250px;">
+                        <canvas id="flexibilidadChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-accent text-white rounded-lg shadow-lg p-8 text-center mt-12">
+                <h3 class="text-3xl font-black">¡Tu Viaje Comienza Hoy!</h3>
+                <p class="mt-2 mb-6 text-lg">Sé el profesional indispensable que garantiza la calidad del conocimiento en la era digital.</p>
+                <a href="#" class="bg-card-bg text-accent font-bold py-3 px-6 rounded-lg hover:bg-gray-200 transition-colors">
+                    Ver Planes de Inscripción
+                </a>
+            </div>
+        </section>
+
+        <!-- SECCIÓN 4: TESTIMONIOS -->
+        <section id="testimonios" class="content-section">
+            <h2 class="text-3xl font-bold text-primary mb-4">4. Testimonios de Estudiantes</h2>
+            <p class="text-lg text-secondary mb-8">Escucha a quienes ya están transformando el aprendizaje en Argentina. Sus voces reflejan el impacto real de la Licenciatura en sus carreras.</p>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                
+                <!-- Testimonio 1 -->
+                <div class="bg-card-bg rounded-lg shadow-xl p-6 relative overflow-hidden">
+                    <span class="quote-icon absolute top-[-10px] left-2 opacity-10">❝</span>
+                    <p class="text-lg italic text-dark-text relative z-10 mb-4">"La Licenciatura me dio la visión estratégica para dejar de ser solo un docente y convertirme en un arquitecto de la educación digital."</p>
+                    <p class="text-sm font-bold text-primary mt-2">— Martín S., Docente y Diseñador Instruccional, Buenos Aires</p>
+                </div>
+
+                <!-- Testimonio 2 -->
+                <div class="bg-card-bg rounded-lg shadow-xl p-6 relative overflow-hidden">
+                    <span class="quote-icon absolute top-[-10px] left-2 opacity-10">❝</span>
+                    <p class="text-lg italic text-dark-text relative z-10 mb-4">"Pude justificar mi presupuesto de capacitación con datos gracias a la analítica de aprendizaje que aprendí. ¡El ROI fue inmediato!"</p>
+                    <p class="text-sm font-bold text-primary mt-2">— Sofía L., Gerente de RR.HH., Córdoba</p>
+                </div>
+
+                <!-- Testimonio 3 -->
+                <div class="bg-card-bg rounded-lg shadow-xl p-6 relative overflow-hidden">
+                    <span class="quote-icon absolute top-[-10px] left-2 opacity-10">❝</span>
+                    <p class="text-lg italic text-dark-text relative z-10 mb-4">"Lo mejor fue aprender a integrar Microlearning y DUA. Ahora mis cursos son accesibles, cortos y generan un compromiso real."</p>
+                    <p class="text-sm font-bold text-primary mt-2">— Ramiro F., Consultor E-learning, Chaco</p>
+                </div>
+
+            </div>
+            
+            <div class="bg-secondary text-white rounded-lg shadow-lg p-8 text-center mt-12">
+                <h3 class="text-2xl font-black">¡Únete a la Comunidad de Líderes!</h3>
+                <p class="mt-2 mb-6">Tu experiencia y voz son el futuro del sector.</p>
+                <a href="#" class="bg-accent text-white font-bold py-3 px-6 rounded-full hover:bg-opacity-80 transition-colors">
+                    Solicitar Información
+                </a>
+            </div>
+        </section>
+
+
+    </main>
+
+    <footer class="text-center p-4 mt-8 text-secondary text-sm">
+        SPA Interactivo de Tecnología Educativa &copy; 2025.
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            
+            // --- Lógica de Navegación Principal ---
+            const navLinks = document.querySelectorAll('.nav-tab-button');
+            const sections = document.querySelectorAll('.content-section');
+
+            window.showSection = function(sectionId) {
+                sections.forEach(section => {
+                    if (section.id === sectionId) {
+                        section.classList.add('active');
+                    } else {
+                        section.classList.remove('active');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    if (link.id === `nav-${sectionId}`) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+
+            // --- Lógica de Sub-Navegación (Sección 2) ---
+            const subNavLinks = document.querySelectorAll('.sub-nav-link');
+            const subSections = document.querySelectorAll('.sub-content-section');
+
+            window.showSubSection = function(subSectionId) {
+                subSections.forEach(section => {
+                    section.classList.toggle('active', section.id === `sub-content-${subSectionId}`);
+                });
+                subNavLinks.forEach(link => {
+                    link.classList.toggle('active', link.id === `sub-nav-${subSectionId}`);
+                });
+            }
+
+            // --- Lógica de Gráficos ---
+
+            // Función de ajuste de etiquetas (Label Wrapping)
+            function wrapLabel(label) {
+              const max = 16;
+              if (typeof label !== 'string' || label.length <= max) return label;
+              const words = label.split(' ');
+              let lines = [];
+              let currentLine = '';
+              for (const word of words) {
+                if ((currentLine + ' ' + word).trim().length > max) {
+                  lines.push(currentLine.trim());
+                  currentLine = word;
+                } else {
+                  currentLine = (currentLine + ' ' + word).trim();
+                }
+              }
+              if (currentLine) lines.push(currentLine.trim());
+              return lines.length > 0 ? lines : [label];
+            }
+
+            // Callback de Tooltip Obligatorio
+            const mandatoryTooltipConfig = {
+              plugins: {
+                tooltip: {
+                  callbacks: {
+                    title: function(tooltipItems) {
+                      const item = tooltipItems[0];
+                      let label = item.chart.data.labels[item.dataIndex];
+                      if (Array.isArray(label)) {
+                        return label.join(' ');
+                      } else {
+                        return label;
+                      }
+                    }
+                  }
+                }
+              }
+            };
+            
+            const primaryColor = '#009688';
+            const accentColor = '#FF5722';
+            const secondaryColor = '#607D8B';
+            const textColor = '#333333';
+
+            // Gráfico 1: Competencias (Radar)
+            const radarLabels = [
+                'Diseño Instruccional (DI)', 
+                'Microlearning', 
+                'Aprendizaje Colaborativo', 
+                'Aprendizaje Basado en Retos (ABR)', 
+                'Evaluación (Rúbricas)',
+                'IA en Educación'
+            ].map(wrapLabel);
+            
+            const ctxRadar = document.getElementById('competenciasChart');
+            if (ctxRadar) {
+                new Chart(ctxRadar, {
+                    type: 'radar',
+                    data: {
+                        labels: radarLabels,
+                        datasets: [{
+                            label: 'Nivel de Competencia',
+                            data: [5, 4, 4, 5, 4, 5],
+                            backgroundColor: 'rgba(0, 150, 136, 0.2)',
+                            borderColor: primaryColor,
+                            pointBackgroundColor: primaryColor,
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        scales: {
+                            r: {
+                                pointLabels: {
+                                    font: { size: 12 },
+                                    color: textColor
+                                },
+                                ticks: { display: false }
+                            }
+                        },
+                        plugins: mandatoryTooltipConfig.plugins
+                    }
+                });
+            }
+
+            // Gráfico 2: Salarios (Bar) (REINCORPORADO)
+            const salariosLabels = [
+                'Salario Promedio IT', 
+                'Salario Tecnólogo Ed.'
+            ].map(wrapLabel);
+
+            const ctxBar = document.getElementById('salariosChart');
+            if (ctxBar) {
+                new Chart(ctxBar, {
+                    type: 'bar',
+                    data: {
+                        labels: salariosLabels,
+                        datasets: [{
+                            label: 'Salario Conceptual (Base 100)',
+                            data: [100, 125],
+                            backgroundColor: [secondaryColor, primaryColor],
+                            borderColor: [secondaryColor, primaryColor],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        scales: { y: { beginAtZero: true, max: 150 } },
+                        plugins: {
+                            ...mandatoryTooltipConfig.plugins,
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+
+            // Gráfico 3: Flexibilidad (Donut) (REINCORPORADO)
+            const ctxDonut = document.getElementById('flexibilidadChart');
+            if (ctxDonut) {
+                new Chart(ctxDonut, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Remoto', 'Presencial/Híbrido'],
+                        datasets: [{
+                            data: [80, 20],
+                            backgroundColor: [primaryColor, accentColor],
+                            borderColor: '#FFFFFF',
+                            borderWidth: 4
+                        }]
+                    },
+                    options: {
+                        maintainAspectRatio: false,
+                        responsive: true,
+                        cutout: '70%',
+                        plugins: {
+                            ...mandatoryTooltipConfig.plugins,
+                            legend: { position: 'bottom' }
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
