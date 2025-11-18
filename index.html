@@ -228,7 +228,7 @@
 
         <!-- SECCIÓN 3: DEMANDA E IMPACTO -->
         <section id="impacto" class="content-section">
-            <h2 class="text-3xl font-bold text-primary mb-4">3. Demanda Actual e Impacto Profesional</h2>
+            <h2 class="text-3xl font-bold text-primary mb-4">3. Demanda Actual y Valor del Sector</h2>
             <p class="text-lg text-secondary mb-8">Esta carrera responde a una demanda concreta y creciente. La inversión en formación se traduce en un claro retorno profesional y un alto impacto en los sectores clave.</p>
 
             <!-- Subsección de Demanda -->
@@ -262,26 +262,7 @@
                 </div>
             </div>
 
-            <!-- Subsección de Impacto Económico -->
-            <h3 class="text-2xl font-bold text-secondary mb-6 mt-12">Impacto Económico y Profesional</h3>
-            <p class="text-lg text-secondary mb-8">Los roles de *Instructional Designer* y *E-learning Manager* están entre los más buscados y mejor pagados en Argentina y LATAM.</p>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <!-- Card Salarios -->
-                <div class="bg-card-bg rounded-lg shadow-md p-6">
-                    <h4 class="text-center font-bold text-primary mb-4">Comparativa Salarial</h4>
-                    <div class="chart-container" style="height: 250px;">
-                        <canvas id="salariosChart"></canvas>
-                    </div>
-                </div>
-                <!-- Card Flexibilidad -->
-                <div class="bg-card-bg rounded-lg shadow-md p-6">
-                    <h4 class="text-center font-bold text-primary mb-4">Flexibilidad (80% Remoto)</h4>
-                    <div class="chart-container-sm" style="height: 250px;">
-                        <canvas id="flexibilidadChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
+            
             <div class="bg-accent text-white rounded-lg shadow-lg p-8 text-center mt-12">
                 <h3 class="text-3xl font-black">¡Tu Viaje Comienza Hoy!</h3>
                 <p class="mt-2 mb-6 text-lg">Sé el profesional indispensable que garantiza la calidad del conocimiento en la era digital.</p>
@@ -298,25 +279,25 @@
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
                 
-                <!-- Testimonio 1 -->
+                <!-- Testimonio 1 (Luciana Yanacon Fe) -->
                 <div class="bg-card-bg rounded-lg shadow-xl p-6 relative overflow-hidden">
                     <span class="quote-icon absolute top-[-10px] left-2 opacity-10">❝</span>
-                    <p class="text-lg italic text-dark-text relative z-10 mb-4">"La Licenciatura me dio la visión estratégica para dejar de ser solo un docente y convertirme en un arquitecto de la educación digital."</p>
-                    <p class="text-sm font-bold text-primary mt-2">— Martín S., Docente y Diseñador Instruccional, Buenos Aires</p>
+                    <p class="text-base italic text-dark-text relative z-10 mb-4">"La Licenciatura en Tecnología Educativa transformó profundamente mi manera de enseñar y aprender, permitiéndome integrar la innovación digital con una **mirada pedagógica crítica y humana** que hoy guía cada una de mis prácticas profesionales."</p>
+                    <p class="text-sm font-bold text-primary mt-2">— Prof. Luciana Yanacon Fe, Estudiante avanzada de LTE</p>
                 </div>
 
-                <!-- Testimonio 2 -->
+                <!-- Testimonio 2 (Sebastián Charras) -->
                 <div class="bg-card-bg rounded-lg shadow-xl p-6 relative overflow-hidden">
                     <span class="quote-icon absolute top-[-10px] left-2 opacity-10">❝</span>
-                    <p class="text-lg italic text-dark-text relative z-10 mb-4">"Pude justificar mi presupuesto de capacitación con datos gracias a la analítica de aprendizaje que aprendí. ¡El ROI fue inmediato!"</p>
-                    <p class="text-sm font-bold text-primary mt-2">— Sofía L., Gerente de RR.HH., Córdoba</p>
+                    <p class="text-base italic text-dark-text relative z-10 mb-4">"La licenciatura me mostró que la tecnología es el medio para transformar el aprendizaje, pero para llevar a cabo esa transformación, el foco **no debe estar en la tecnología, sino en el estudiante**."</p>
+                    <p class="text-sm font-bold text-primary mt-2">— Programador Sebastián Charras, Estudiante avanzado de LTE</p>
                 </div>
-
-                <!-- Testimonio 3 -->
+                
+                <!-- Testimonio 3 (Camilo R Viera) -->
                 <div class="bg-card-bg rounded-lg shadow-xl p-6 relative overflow-hidden">
                     <span class="quote-icon absolute top-[-10px] left-2 opacity-10">❝</span>
-                    <p class="text-lg italic text-dark-text relative z-10 mb-4">"Lo mejor fue aprender a integrar Microlearning y DUA. Ahora mis cursos son accesibles, cortos y generan un compromiso real."</p>
-                    <p class="text-sm font-bold text-primary mt-2">— Ramiro F., Consultor E-learning, Chaco</p>
+                    <p class="text-base italic text-dark-text relative z-10 mb-4">"Como profesional de la educación esta licenciatura amplió mi mirada al incorporar más estrategias y metodologias para incorporar tecnologia en los espacios de aprendizaje en los diferentes ambitos y etapas de la vida de las personas"</p>
+                    <p class="text-sm font-bold text-primary mt-2">— Profesor Camilo R Viera, Estudiante avanzado de LTE</p>
                 </div>
 
             </div>
@@ -518,6 +499,11 @@
                     }
                 });
             }
+            
+            // Inicializa la primera sección activa al cargar
+            showSection('contexto');
+            showSubSection('perfil');
+
         });
     </script>
 </body>
